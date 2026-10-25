@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MandateIQ</title>
+<meta name="description" content="One view of every UPI Autopay mandate across your payment gateways: status, upcoming debits, failure risk and reconciliation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1C2E5A;        /* passbook blue */
+    --ink-soft:#33457A;
+    --paper:#EEF1F5;      /* cool page */
+    --sheet:#FFFFFF;
+    --rule:#C9D1DE;
+    --muted:#5B6577;
+    --ok:#1F7A4D;
+    --warn:#9A6200;
+    --risk:#B3261E;
+    --focus:#2F6FED;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.6 "Source Sans 3",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:4px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+  h1,h2,h3{font-family:"Bricolage Grotesque",sans-serif;line-height:1.1;margin:0;letter-spacing:-0.015em}
+  h1{font-size:clamp(2.3rem,5.4vw,3.9rem);font-weight:700}
+  h2{font-size:clamp(1.7rem,3.4vw,2.4rem);font-weight:700}
+  h3{font-size:1.2rem;font-weight:500}
+  p{margin:0}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* header */
+  .top{display:flex;justify-content:space-between;align-items:center;padding:22px 0}
+  .logo{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:1.3rem;text-decoration:none}
+  .logo span{display:inline-block;width:.62em;height:.62em;border:3px solid var(--ink);border-radius:50%;margin-right:8px;position:relative;top:1px}
+  .btn{display:inline-block;background:var(--ink);color:#fff;text-decoration:none;font-weight:600;padding:12px 20px;border-radius:8px;border:0;font-size:1rem;cursor:pointer;font-family:inherit}
+  .btn:hover{background:var(--ink-soft)}
+  .btn-ghost{background:transparent;color:var(--ink);border:2px solid var(--ink);padding:10px 18px}
+  .btn-ghost:hover{background:var(--ink);color:#fff}
+
+  /* hero */
+  .hero{display:grid;grid-template-columns:1fr 1.05fr;gap:56px;align-items:center;padding:48px 0 88px}
+  .hero p.lede{margin-top:22px;font-size:1.2rem;color:var(--muted);max-width:34em}
+  .hero .ctas{margin-top:32px;display:flex;gap:12px;flex-wrap:wrap}
+
+  /* the passbook — the one memorable element */
+  .passbook{background:var(--sheet);border-radius:6px 6px 14px 14px;box-shadow:0 1px 0 var(--rule),0 18px 40px -22px rgba(28,46,90,.45);overflow:hidden;position:relative}
+  .passbook header{background:var(--ink);color:#fff;padding:16px 20px;display:flex;justify-content:space-between;align-items:baseline}
+  .passbook header strong{font-family:"Bricolage Grotesque",sans-serif;font-weight:500;font-size:1.05rem}
+  .passbook header small{opacity:.75}
+  .ledger{width:100%;border-collapse:collapse;font-size:.95rem}
+  .ledger th{text-align:left;font-weight:600;color:var(--muted);font-size:.85rem;padding:10px 12px;border-bottom:2px solid var(--ink)}
+  .ledger td{padding:13px 12px;border-bottom:1px dashed var(--rule);vertical-align:top}
+  .ledger td.amt,.ledger th.amt{text-align:right}
+  .ledger tr:last-child td{border-bottom:0}
+  .ledger .what{font-weight:600}
+  .ledger .what small{display:block;font-weight:400;color:var(--muted);font-size:.82rem}
+  .st{font-weight:600;font-size:.88rem}
+  .ledger td.num{white-space:nowrap}
+  .st.ok{color:var(--ok)} .st.warn{color:var(--warn)} .st.risk{color:var(--risk)} .st.muted{color:var(--muted)}
+  .risk-row{background:#FBEFEE}
+  .stamp{position:absolute;right:16px;bottom:12px;transform:rotate(-9deg);border:3px solid var(--risk);color:var(--risk);border-radius:8px;padding:4px 12px;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:.95rem;opacity:0;animation:stamp .5s 1.1s cubic-bezier(.2,1.6,.4,1) forwards;background:rgba(255,255,255,.85)}
+  @keyframes stamp{from{opacity:0;transform:rotate(-9deg) scale(1.8)}to{opacity:.92;transform:rotate(-9deg) scale(1)}}
+  .passbook footer{padding:12px 16px;border-top:1px solid var(--rule);font-size:.85rem;color:var(--muted)}
+
+  /* sections */
+  section.band{padding:88px 0;border-top:1px solid var(--rule)}
+  .split{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+  .split .intro p{margin-top:16px;color:var(--muted)}
+  .facts{display:grid;gap:28px}
+  .fact{display:grid;grid-template-columns:9.5rem 1fr;gap:20px;align-items:baseline}
+  .fact b{font-family:"Bricolage Grotesque",sans-serif;font-size:2rem;font-weight:700}
+  .fact p{color:var(--ink)}
+  .fact small{display:block;color:var(--muted);font-size:.85rem;margin-top:4px}
+
+  .features{display:grid;grid-template-columns:repeat(2,1fr);gap:40px 48px;margin-top:44px}
+  .feature h3{padding-top:14px;border-top:3px solid var(--ink)}
+  .feature p{margin-top:10px;color:var(--muted)}
+
+  .dark{background:var(--ink);color:#fff;border-top:0}
+  .dark .intro p,.dark .muted{color:#C3CCE0}
+  .port{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  .flow{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  .port .intro p{margin-top:16px}
+  .node{border:2px solid #fff;border-radius:10px;padding:14px 16px;min-width:8.5rem}
+  .node small{display:block;color:#C3CCE0;font-size:.8rem}
+  .node strong{font-family:"Bricolage Grotesque",sans-serif;font-weight:500}
+  .arrow{font-size:1.6rem;color:#C3CCE0}
+
+  .roadmap{list-style:none;padding:0;margin:44px 0 0;display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid var(--ink)}
+  .roadmap li{padding:20px 20px 0 0;position:relative}
+  .roadmap li::before{content:"";position:absolute;top:-8px;left:0;width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--ink)}
+  .roadmap li.now::before{background:var(--ink)}
+  .roadmap .when{color:var(--muted);font-size:.9rem;margin-top:16px}
+  .roadmap h3{margin-top:4px}
+  .roadmap p{color:var(--muted);font-size:.95rem;margin-top:6px}
+
+  .who{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+  .who span{background:var(--sheet);border:1px solid var(--rule);border-radius:999px;padding:8px 16px;font-weight:600}
+
+  form{background:var(--sheet);border-radius:12px;padding:28px;display:grid;gap:16px;box-shadow:0 1px 0 var(--rule)}
+  label{font-weight:600;font-size:.95rem;display:grid;gap:6px}
+  input,select{font:inherit;padding:11px 12px;border:1.5px solid var(--rule);border-radius:8px;background:#fff;color:var(--ink)}
+  input:focus,select:focus{border-color:var(--focus);outline:none;box-shadow:0 0 0 3px rgba(47,111,237,.2)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .form-note{font-size:.85rem;color:var(--muted)}
+  .thanks{display:none;font-weight:600;color:var(--ok)}
+
+  .foot{padding:36px 0 48px;color:var(--muted);font-size:.9rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid var(--rule)}
+
+  @media (max-width:900px){
+    .hero,.split,.port{grid-template-columns:1fr;gap:40px}
+    .roadmap{grid-template-columns:1fr 1fr;row-gap:28px}
+  }
+  @media (max-width:600px){
+    .wrap{padding:0 16px}
+    .features,.two{grid-template-columns:1fr}
+    .fact{grid-template-columns:1fr;gap:4px}
+    .roadmap{grid-template-columns:1fr}
+    .ledger th.rail,.ledger td.rail{display:none}
+    .ledger td,.ledger th{padding:10px 8px}
+    .ledger{font-size:.85rem}
+    .ledger .what small{display:none}
+    .top .btn{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .stamp{animation:none;opacity:.92}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="top" aria-label="Main">
+    <a class="logo" href="#"><span aria-hidden="true"></span>MandateIQ</a>
+    <a class="btn btn-ghost" href="#pilot">Join the pilot</a>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <h1>Know which UPI Autopay debits will fail before the debit date.</h1>
+      <p class="lede">MandateIQ gives Indian merchants one view of every UPI Autopay mandate across their payment gateways: status, upcoming debits, failure risk and reconciliation. eNACH and card e-mandates come next.</p>
+      <div class="ctas">
+        <a class="btn" href="#pilot">Join the pilot</a>
+        <a class="btn btn-ghost" href="#how">See what it does</a>
+      </div>
+    </div>
+
+    <div class="passbook" role="figure" aria-label="Example mandate ledger showing upcoming debits and their risk">
+      <header><strong>Upcoming debits</strong><small class="num">Week of 1 Nov</small></header>
+      <table class="ledger">
+        <thead><tr><th>Date</th><th>Mandate</th><th class="rail">Gateway</th><th class="amt">Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="num">01 Nov</td><td class="what">SIP, monthly<small>UMN …4f2a</small></td><td class="rail">PG A</td><td class="amt num">₹5,000</td><td><span class="st ok">Debited</span></td></tr>
+          <tr><td class="num">03 Nov</td><td class="what">Loan EMI<small>UMN …91c0</small></td><td class="rail">PG B</td><td class="amt num">₹12,480</td><td><span class="st muted">Notice sent</span></td></tr>
+          <tr class="risk-row"><td class="num">05 Nov</td><td class="what">Insurance premium<small>UMN …7d13</small></td><td class="rail">PG A</td><td class="amt num">₹2,350</td><td><span class="st risk">71% failure risk</span></td></tr>
+          <tr><td class="num">07 Nov</td><td class="what">OTT subscription<small>UMN …0be8</small></td><td class="rail">PG C</td><td class="amt num">₹199</td><td><span class="st warn">Paused by payer</span></td></tr>
+          <tr><td class="num">08 Nov</td><td class="what">Loan EMI<small>UMN …c55e</small></td><td class="rail">PG B</td><td class="amt num">₹8,900</td><td><span class="st ok">Retry on payday</span></td></tr>
+        </tbody>
+      </table>
+      <div class="stamp" aria-hidden="true">Act before 05 Nov</div>
+      <footer>Illustrative data.</footer>
+    </div>
+  </header>
+</div>
+
+<section class="band">
+  <div class="wrap split">
+    <div class="intro">
+      <h2>Recurring revenue leaks quietly.</h2>
+      <p>Most merchants find out a debit failed after it failed. By then the customer has missed a premium, an EMI or a renewal, and recovery costs more than prevention.</p>
+    </div>
+    <div class="facts">
+      <div class="fact"><b class="num">~1.8 Bn</b><p>UPI e-mandate transactions processed by the top 10 banks in a single month<small>July 2026, roughly 3× a year earlier</small></p></div>
+      <div class="fact"><b class="num">3–4</b><p>gateways a mid-size merchant often runs mandates through, each with its own dashboard and report format</p></div>
+      <div class="fact"><b class="num">0</b><p>places today where a merchant sees every mandate, every upcoming debit and every failure in one view</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="how">
+  <div class="wrap">
+    <h2>What MandateIQ does</h2>
+    <div class="features">
+      <div class="feature"><h3>One mandate register</h3><p>Every UPI Autopay mandate across your gateways in one list, with its UMN, status, limit, frequency and history.</p></div>
+      <div class="feature"><h3>Debit calendar</h3><p>See what will be presented on each day, which pre-debit notices went out, and how much you expect to collect.</p></div>
+      <div class="feature"><h3>Failure prediction</h3><p>Each upcoming debit gets a risk score from payer history, timing and past response codes, so your team acts days ahead.</p></div>
+      <div class="feature"><h3>Smarter retries</h3><p>Suggests the best day to retry within NPCI rules, such as after the payer's usual salary credit.</p></div>
+      <div class="feature"><h3>Automatic reconciliation</h3><p>Matches debits, settlements and refunds to mandates and flags anything unmatched before month-end.</p></div>
+      <div class="feature"><h3>Daily brief</h3><p>A short morning summary in plain English: what was collected, what failed, what is at risk this week.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band dark">
+  <div class="wrap port">
+    <div class="intro">
+      <h2>Mandates can now move between gateways. Use that.</h2>
+      <p>NPCI's UPI Autopay interoperability framework lets merchants execute existing mandates through a different payment provider, instead of re-registering every customer. MandateIQ shows which gateway performs best for each mandate segment and plans the migration.</p>
+    </div>
+    <div class="flow" aria-label="Mandate moving from one gateway to another">
+      <div class="node"><small>Today</small><strong>Gateway A</strong></div>
+      <span class="arrow" aria-hidden="true">↓</span>
+      <div class="node"><small>MandateIQ</small><strong>Compare success rates</strong></div>
+      <span class="arrow" aria-hidden="true">↓</span>
+      <div class="node"><small>After migration</small><strong>Gateway B</strong></div>
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap">
+    <h2>India first, then one rail at a time</h2>
+    <ol class="roadmap">
+      <li class="now"><p class="when">Now</p><h3>UPI Autopay</h3><p>Multi-gateway mandate register, risk scoring and reconciliation.</p></li>
+      <li><p class="when">Next</p><h3>eNACH</h3><p>Loan EMIs, insurance and SIPs on bank-account mandates.</p></li>
+      <li><p class="when">Then</p><h3>Card e-mandates</h3><p>Tokenised recurring card payments under RBI rules.</p></li>
+      <li><p class="when">Later</p><h3>Global direct debit</h3><p>BACS, SEPA and ACH for merchants collecting abroad.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" id="pilot">
+  <div class="wrap split">
+    <div class="intro">
+      <h2>Join the pilot</h2>
+      <p>We are working with a small group of merchants that collect through UPI Autopay. Pilot partners shape the product and get early pricing.</p>
+      <div class="who"><span>NBFCs and lenders</span><span>Insurers</span><span>Mutual funds and brokers</span><span>Subscription apps</span><span>Utilities and education</span></div>
+    </div>
+    <form id="pilot-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <div class="two">
+        <label>Name<input name="name" autocomplete="name" required></label>
+        <label>Work email<input type="email" name="email" autocomplete="email" required></label>
+      </div>
+      <div class="two">
+        <label>Company<input name="company" autocomplete="organization" required></label>
+        <label>Active mandates
+          <select name="mandates">
+            <option>Under 10,000</option><option>10,000 to 1 lakh</option><option>1 lakh to 10 lakh</option><option>Over 10 lakh</option>
+          </select>
+        </label>
+      </div>
+      <button class="btn" type="submit">Request pilot access</button>
+      <p class="thanks" role="status" id="thanks">Request received. We'll email you within two working days.</p>
+      <p class="form-note">We only use your details to contact you about the pilot.</p>
+    </form>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer class="foot">
+    <span>© <span id="yr"></span> MandateIQ</span>
+    <a href="mailto:hello@mandateiq.in">hello@mandateiq.in</a>
+  </footer>
+</div>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  const form = document.getElementById('pilot-form');
+  form.addEventListener('submit', async (e) => {
+    if (form.action.includes('YOUR_FORM_ID')) return; // falls back to normal post until configured
+    e.preventDefault();
+    try {
+      const res = await fetch(form.action, {method:'POST', body:new FormData(form), headers:{Accept:'application/json'}});
+      if (res.ok) { form.reset(); document.getElementById('thanks').style.display = 'block'; }
+      else { alert('That didn\'t go through. Email hello@mandateiq.in instead.'); }
+    } catch { alert('That didn\'t go through. Email hello@mandateiq.in instead.'); }
+  });
+</script>
+</body>
+</html>
